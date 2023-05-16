@@ -10,7 +10,7 @@ s.boot;
 
 SynthDef(\maracas,
 	{
-		arg density = 10000, reverb = 0.1, goingDown = 1, t_trig = 0;
+		arg density = 10000, reverb = 0.1, goingDown = 1, t_trig = 0, gain = 1;
 		var sig;
 
 		sig = [Dust2.ar(density, 0.2), Dust2.ar(density, 0.2)];
@@ -26,7 +26,7 @@ SynthDef(\maracas,
             sig[1], // Right Channel
             reverb, 0.1, 1
         );
-		Out.ar(0, sig);
+		Out.ar(0, sig * gain);
 	}
 ).add;
 
@@ -39,20 +39,22 @@ SynthDef(\maracas,
 
 NetAddr("127.0.0.1", 57120); // Same of the one in processing
 
-~maracas = Synth(\maracas);
+~maracas = Synth(\maracas, [\t_trig, 1, \gain, 1]);
 
 OSCdef('OSCreceiver', // unfold the message
 	{
 		arg msg;
-		var density, reverb, trigger, isDown = 0;
+		var density, reverb, trigger, isDown = 0, gain;
 
 		density = msg[1];
 		reverb = msg[2];
 		trigger = msg[3];
 		isDown = msg[4];
+		gain = msg[5];
 
 		reverb = reverb / 2;
 		density = (density * 7000) + 3000;
+		gain = gain / 255;
 
 		if(trigger == '1',
 			{
@@ -62,14 +64,18 @@ OSCdef('OSCreceiver', // unfold the message
 							\density, density,
 							\reverb, reverb,
 							\goingDown, isDown.asInteger,
-							\t_trig, 1);
+							\t_trig, 1,
+							\gain, gain
+						);
 				});
 				if((isDown == '0'),
 					{
 						~maracas.set(\density, density,
 							\reverb, reverb,
 							\goingDown, isDown.asInteger,
-							\t_trig, 1);
+							\t_trig, 1,
+							\gain, gain
+						);
 				});
 		});
 	},
