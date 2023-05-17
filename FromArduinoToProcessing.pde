@@ -2,12 +2,15 @@ import processing.serial.*;
 import oscP5.*; // .* = all the functions of the library
 import netP5.*;
 import controlP5.*;
-ControlP5 cP5;
 
+ControlP5 cP5;
 Serial myPort;
 OscP5 oscP5;
 NetAddress myRemoteLocation;
 
+int fixed = 0;
+int xVal = 0;
+int yVal = 0;
 int currentPot = 0;
 int val = 1;
 int isLow = 0;
@@ -17,6 +20,9 @@ PImage img_background;
 PImage img_sand;
 float altezza = -50;
 float knobValue; 
+float panPos = 0;
+float xDist = 0;
+float yDist = 0;
 int x1Space = 320;
 int x2Space = 1100;
 int y1Space = 315;
@@ -63,17 +69,36 @@ void draw() {
   image(img_sand, 1100, int(altezza)); // range y da 20 a -50
   image(img_background, 0, 0);
   
-  if(mouseX > x1Space && mouseX < x2Space && mouseY > y1Space) {
-    noCursor();
+  if(mouseX > x1Space && mouseX < x2Space && mouseY > y1Space) {   
     if(isLow == 1) {
+      if(fixed == 0){  
+        noCursor(); 
         image(img_rotated, mouseX - 68, mouseY - 55);
+      }
+      else{
+        cursor(ARROW);
+        image(img_rotated, xVal - 68, yVal - 55);
+      }
     }
     else {
-        image(img, mouseX - 68, mouseY - 55);
+        if(fixed == 0){  
+          noCursor(); 
+          image(img, mouseX - 68, mouseY - 55);
+        }
+        else{
+          cursor(ARROW);
+          image(img, xVal - 68, yVal - 55);
+        }
     }
   }
   else {
     cursor(ARROW);
+    if(isLow == 1 && fixed == 1) {
+      image(img_rotated, xVal - 68, yVal - 55);
+    }
+    if(isLow == 0 && fixed == 1) {
+      image(img, xVal - 68, yVal - 55);
+    }
   }
   
   noFill();
@@ -92,23 +117,40 @@ void draw() {
   textSize(17);
   textAlign(CENTER);
   
-  float panPos = ((float)mouseX - (float)x1Space) / ((float)x2Space - (float)x1Space);
+  if(fixed == 0){
+    panPos = ((float)mouseX - (float)x1Space) / ((float)x2Space - (float)x1Space);
+    xDist = (mouseX - ((x1Space + x2Space) / 2));
+    if(mouseX > x2Space){
+      xDist = x2Space - ((x1Space + x2Space) / 2);
+    }
+    if(mouseX < x1Space){
+      xDist = x1Space - ((x1Space + x2Space) / 2);
+    }
+    yDist = (y2Space - mouseY);
+    if(mouseY < y1Space){
+      yDist = (y2Space - y1Space);
+    }
+  }
+  else{
+    panPos = ((float)xVal - (float)x1Space) / ((float)x2Space - (float)x1Space);
+    xDist = (xVal - ((x1Space + x2Space) / 2));
+    if(xVal > x2Space){
+      xDist = x2Space - ((x1Space + x2Space) / 2);
+    }
+    if(xVal < x1Space){
+      xDist = x1Space - ((x1Space + x2Space) / 2);
+    }
+    yDist = (y2Space - yVal);
+    if(yVal < y1Space){
+      yDist = (y2Space - y1Space);
+    }
+  }
+  
   if(panPos > 1){
     panPos = 1;
   }
   if(panPos < 0){
     panPos = 0;
-  }
-  float xDist = (mouseX - ((x1Space + x2Space) / 2));
-  if(mouseX > x2Space){
-    xDist = x2Space - ((x1Space + x2Space) / 2);
-  }
-  if(mouseX < x1Space){
-    xDist = x1Space - ((x1Space + x2Space) / 2);
-  }
-  float yDist = (y2Space - mouseY);
-  if(mouseY < y1Space){
-    yDist = (y2Space - y1Space);
   }
   
   OscMessage myMessage = new OscMessage("/mar");
@@ -153,4 +195,16 @@ void controlEvent(ControlEvent theEvent) {
          altezza = map(theEvent.getController().getValue(), 3000, 10000, 50, -50);
     }
   } 
+}
+
+void mouseClicked() {
+  if(mouseX > x1Space && mouseX < x2Space && mouseY > y1Space){
+    if (fixed == 0) {
+      xVal = mouseX;
+      yVal = mouseY;
+      fixed = 1;
+    } else {
+      fixed = 0;
+    }
+  }
 }
