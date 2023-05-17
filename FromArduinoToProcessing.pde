@@ -27,7 +27,8 @@ void draw() {
   if(myPort.available() > 0) {
     val = myPort.read();
     if(val == 1) {
-      myMessage.add(mouseX / (float)width);    // Number of grains
+      myMessage.add(mouseX / (float)width);    // pan
+      myMessage.add("1"); // number of grains
       myMessage.add(mouseY / (float)height);   // (-1)*Reverb  
       myMessage.add("1"); // make the sound
       myMessage.add("1"); // maraca position (high or low) (2 possible sounds)
@@ -36,7 +37,8 @@ void draw() {
     }  
     else {
       if(val == 0) {
-        myMessage.add(mouseX / (float)width);    // Number of grains
+        myMessage.add(mouseX / (float)width);    // pan
+        myMessage.add("1"); // number of grains
         myMessage.add(mouseY / (float)height);   // (-1)*Reverb  
         myMessage.add("1");
         myMessage.add("0");
@@ -47,7 +49,7 @@ void draw() {
         currentPot = val;
       }
   }
-  if(myMessage.checkTypetag("ffssi")){
+  if(myMessage.checkTypetag("fsfssi")){
     oscP5.send(myMessage, myRemoteLocation);
     myMessage.print(); // only for the console
   }
