@@ -88,7 +88,7 @@ void draw() {
   text("MASTER VOLUME", 1232, 880);
   textSize(17);
   textAlign(CENTER);
-  text("ENPHASIS", 150, 850);
+  text("EMPHASIS", 150, 850);
   textSize(17);
   textAlign(CENTER);
   
@@ -117,22 +117,22 @@ void draw() {
       val = myPort.read();
       if(val == 1) {
         myMessage.add(panPos);    // pan
-        myMessage.add("1"); // number of grains
+        myMessage.add(grainKnob.getValue()); // number of grains
         myMessage.add((sqrt(pow(xDist,2) + pow(yDist,2))) / (sqrt((pow((y2Space-y1Space),2)) + (pow(((x2Space-x1Space)/2),2)))));   // (-1)*Reverb  
         myMessage.add("1"); // make the sound
         myMessage.add("1"); // maraca position (high or low) (2 possible sounds)
-        myMessage.add(currentPot); // pot value
+        myMessage.add(currentPot); // pot value --> softness
         myMessage.add(volumeKnob.getValue()); // gain
         isLow = 0;
       }  
       else {
         if(val == 0) {
           myMessage.add(panPos);    // pan
-          myMessage.add("1"); // number of grains
+          myMessage.add(grainKnob.getValue()); // number of grains
           myMessage.add((sqrt(pow(xDist,2) + pow(yDist,2))) / (sqrt((pow((y2Space-y1Space),2)) + (pow(((x2Space-x1Space)/2),2)))));   // (-1)*Reverb  
           myMessage.add("1");
           myMessage.add("0");
-          myMessage.add(currentPot); // pot value
+          myMessage.add(currentPot); // pot value --> softness
           myMessage.add(volumeKnob.getValue()); // gain
           isLow = 1;
         }
@@ -140,7 +140,7 @@ void draw() {
           currentPot = val;
         }
     }
-    if(myMessage.checkTypetag("fsfssif")){
+    if(myMessage.checkTypetag("fffssif")){
       oscP5.send(myMessage, myRemoteLocation);
       myMessage.print(); // only for the console
     }

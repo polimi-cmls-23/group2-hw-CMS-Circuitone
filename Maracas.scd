@@ -1,5 +1,3 @@
-// { Dust2.ar(MouseX.kr(1,10000,1), 0.4) }.scope(1, zoom:4);
-
 s.reboot;
 
 (
@@ -35,12 +33,6 @@ SynthDef(\maracas,
 	}
 ).add;
 )
-/*
-~testDown = Synth(\maracas, [\density, 5000, \reverb, 0.2, \goingDown, 1]);
-~testUp = Synth(\maracas, [\density, 5000, \reverb, 0.2, \goingDown, 0]);
-~testDown.set(\t_trig, 1);
-~testUp.set(\t_trig, 1);
-*/
 
 NetAddr("127.0.0.1", 57120); // Same of the one in processing
 
@@ -61,7 +53,6 @@ OSCdef('OSCreceiver', // unfold the message
 
 		pan = LinLin.kr(pan, 0, 1, -1, 1);
 		reverb = LinLin.kr(reverb, 0, 1, 0, 0.6);
-		density = (density * 7000) + 3000;
 		softness = LinLin.kr(softness, 2, 255, 0.3, 3);
 
 		if(trigger == '1',
