@@ -10,15 +10,15 @@ s.boot;
 
 SynthDef(\maracas,
 	{
-		arg density = 10000, reverb = 0.1, goingDown = 1, t_trig = 0, gain = 1;
+		arg density = 10000, reverb = 0.1, goingDown = 1, t_trig = 0, gain = 1, softness = 1;
 		var sig;
 
 		sig = [Dust2.ar(density, 0.2), Dust2.ar(density, 0.2)];
 		sig = SelectX.ar(
 			goingDown,
 			[
-				sig * EnvGen.kr(~envelopeUp, t_trig),
-				sig * EnvGen.kr(~envelopeDown, t_trig)
+				sig * EnvGen.kr(~envelopeUp, t_trig, timeScale: softness),
+				sig * EnvGen.kr(~envelopeDown, t_trig, timeScale: softness)
 			]
 		);
 		sig = FreeVerb2.ar( // FreeVerb2 - true stereo UGen
@@ -29,7 +29,7 @@ SynthDef(\maracas,
 		Out.ar(0, sig * gain);
 	}
 ).add;
-
+)
 /*
 ~testDown = Synth(\maracas, [\density, 5000, \reverb, 0.2, \goingDown, 1]);
 ~testUp = Synth(\maracas, [\density, 5000, \reverb, 0.2, \goingDown, 0]);
@@ -39,22 +39,23 @@ SynthDef(\maracas,
 
 NetAddr("127.0.0.1", 57120); // Same of the one in processing
 
-~maracas = Synth(\maracas, [\t_trig, 1, \gain, 1]);
+~maracas = Synth(\maracas, [\t_trig, 1]);
 
+(
 OSCdef('OSCreceiver', // unfold the message
 	{
 		arg msg;
-		var density, reverb, trigger, isDown = 0, gain;
+		var density, reverb, trigger, isDown = 0, softness;
 
 		density = msg[1];
 		reverb = msg[2];
 		trigger = msg[3];
 		isDown = msg[4];
-		gain = msg[5];
+		softness = msg[5];
 
 		reverb = reverb / 2;
 		density = (density * 7000) + 3000;
-		gain = gain / 255;
+		softness = LinLin.kr(softness, 2, 255, 0.3, 3);
 
 		if(trigger == '1',
 			{
@@ -65,7 +66,7 @@ OSCdef('OSCreceiver', // unfold the message
 							\reverb, reverb,
 							\goingDown, isDown.asInteger,
 							\t_trig, 1,
-							\gain, gain
+							\softness, softness
 						);
 				});
 				if((isDown == '0'),
@@ -74,7 +75,7 @@ OSCdef('OSCreceiver', // unfold the message
 							\reverb, reverb,
 							\goingDown, isDown.asInteger,
 							\t_trig, 1,
-							\gain, gain
+							\softness, softness
 						);
 				});
 		});
