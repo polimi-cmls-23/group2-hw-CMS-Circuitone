@@ -1,6 +1,6 @@
 // { Dust2.ar(MouseX.kr(1,10000,1), 0.4) }.scope(1, zoom:4);
 
-s.boot;
+s.reboot;
 
 (
 ~envelopeDown = Env.new([0,1,0], [0.03,0.2], [0,-4]);
@@ -10,9 +10,12 @@ s.boot;
 
 SynthDef(\maracas,
 	{
-		arg density = 10000, pan = 0, reverb = 0.1, goingDown = 1, t_trig = 0, gain = 1, softness = 1;
-		var sig;
+		arg density = 10000, pan = 0, reverb = 0.1, goingDown = 1, t_trig = 0, softness = 1, gain = 1;
+		var sig, freq, attenuation;
 
+		freq = LinLin.kr(reverb, 0, 0.6, 20000, 3000);
+		attenuation = LinLin.kr(reverb, 0, 0.6, 1, 0.6);
+		gain = gain * attenuation;
 		sig = [Dust2.ar(density, 0.2), Dust2.ar(density, 0.2)];
 		sig = SelectX.ar(
 			goingDown,
@@ -26,7 +29,9 @@ SynthDef(\maracas,
             sig[1], // Right Channel
             reverb, 0.1, 1
         );
-		Out.ar(0, Pan2.ar(Mix.ar(sig) * gain, pan));
+		sig = Pan2.ar(Mix.ar(sig) * gain, pan);
+		sig = LPF.ar(sig, freq);
+		Out.ar(0, sig);
 	}
 ).add;
 )
@@ -39,13 +44,12 @@ SynthDef(\maracas,
 
 NetAddr("127.0.0.1", 57120); // Same of the one in processing
 
-~maracas = Synth(\maracas, [\t_trig, 1]);
-
 (
+~maracas = Synth(\maracas);
 OSCdef('OSCreceiver', // unfold the message
 	{
 		arg msg;
-		var pan, density, reverb, trigger, isDown = 0, softness;
+		var pan, density, reverb, trigger, isDown = 0, softness, gain;
 
 		pan = msg[1];
 		density = msg[2];
@@ -53,9 +57,10 @@ OSCdef('OSCreceiver', // unfold the message
 		trigger = msg[4];
 		isDown = msg[5];
 		softness = msg[6];
+		gain = msg[7];
 
 		pan = LinLin.kr(pan, 0, 1, -1, 1);
-		reverb = reverb / 2;
+		reverb = LinLin.kr(reverb, 0, 1, 0, 0.6);
 		density = (density * 7000) + 3000;
 		softness = LinLin.kr(softness, 2, 255, 0.3, 3);
 
@@ -69,7 +74,8 @@ OSCdef('OSCreceiver', // unfold the message
 							\reverb, reverb,
 							\goingDown, isDown.asInteger,
 							\t_trig, 1,
-							\softness, softness
+							\softness, softness,
+							\gain, gain
 						);
 				});
 				if((isDown == '0'),
@@ -80,7 +86,8 @@ OSCdef('OSCreceiver', // unfold the message
 							\reverb, reverb,
 							\goingDown, isDown.asInteger,
 							\t_trig, 1,
-							\softness, softness
+							\softness, softness,
+							\gain, gain
 						);
 				});
 		});
