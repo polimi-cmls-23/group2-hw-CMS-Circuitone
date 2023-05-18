@@ -17,11 +17,9 @@ void setup() {
 
 void draw() {
   background(0);
-
+  
   // Analyze the audio
   fft.forward(audioPlayer.mix);
-  // audioPlayer.mix retrieves the mix of audio samples from the audioPlayer. 
-  // The mix property represents the combined audio channels (e.g., left and right) as a single channel.
 
   // Calculate the width and height for the spectrogram area
   int spectrogramWidth = width / 3;
@@ -48,10 +46,35 @@ void draw() {
   textSize(16);
   textAlign(CENTER);
   text("Spectrum", spectrogramX + spectrogramWidth / 2, spectrogramY + spectrogramHeight + 20);
-
+  
+  // Calculate the width and height for the waveform area
+  int waveformWidth = width / 3;
+  int waveformHeight = height / 2;
+  
+  // Set the position of the waveform in the bottom right corner
+  int waveformX = width - waveformWidth;
+  int waveformY = height - waveformHeight;
+  
+  // Draw the waveform
+  stroke(0, 255, 0); // Set stroke color to green
+  strokeWeight(1); // Set stroke weight to 1
+  noFill();
+  beginShape();
+  for (int i = 0; i < audioPlayer.bufferSize() - 1; i++) {
+    float x = map(i, 0, audioPlayer.bufferSize(), 0, waveformWidth);
+    float y = map(audioPlayer.left.get(i), -1, 1, waveformY, waveformY + waveformHeight);
+    vertex(x + waveformX, y);
+  }
+  endShape();
+  
+  // Draw the legend
+  fill(255);
+  textSize(16);
+  textAlign(CENTER);
+  text("Waveform", waveformX + waveformWidth / 2,  height- 20);
+  
+  
 }
-
-
 
 
 void stop() {
