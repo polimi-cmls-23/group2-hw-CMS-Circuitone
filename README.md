@@ -16,6 +16,8 @@ plus a couple of sensors connected to the Arduino board.
 
 <hr>
 
+<br />
+
 <p align="center">
   <img src="https://github.com/andre3pazo/HW3-CMLS/assets/89461273/dbf14873-58d7-4990-8f01-777fd3566330" alt="CMS diagram" width = 681 height="whatever">
 </p>
