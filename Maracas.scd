@@ -9,9 +9,10 @@ s.reboot;
 SynthDef(\maracas,
 	{
 		arg density = 10000, pan = 0, reverb = 0.1, goingDown = 1, t_trig = 0, softness = 1, gain = 1;
-		var sig, freq, attenuation;
+		var sig, freq, delay, attenuation;
 
 		freq = LinLin.kr(reverb, 0, 0.6, 20000, 3000);
+		delay = LinLin.kr(reverb, 0, 0.6, 0, 0.1);
 		attenuation = LinLin.kr(reverb, 0, 0.6, 1, 0.6);
 		gain = gain * attenuation;
 		sig = [Dust2.ar(density, 0.2), Dust2.ar(density, 0.2)];
@@ -27,16 +28,15 @@ SynthDef(\maracas,
             sig[1], // Right Channel
             reverb, 0.1, 1
         );
+		sig = DelayC.ar(sig, maxdelaytime: 0.1, delaytime: delay, mul: reverb/2, add: sig);
 		sig = Pan2.ar(Mix.ar(sig) * gain, pan);
 		sig = LPF.ar(sig, freq);
 		Out.ar(0, sig);
 	}
 ).add;
-)
 
 NetAddr("127.0.0.1", 57120); // Same of the one in processing
 
-(
 ~maracas = Synth(\maracas);
 OSCdef('OSCreceiver', // unfold the message
 	{
