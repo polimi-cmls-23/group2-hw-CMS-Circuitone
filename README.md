@@ -16,7 +16,7 @@ plus a couple of sensors connected to the Arduino board.
 
 <hr>
 
-<img align="right" src="https://github.com/andre3pazo/HW3-CMLS/assets/89461273/86f871e1-edb6-458a-88bf-b1c4b8c0adee" alt="Schematics" width="500" height="whatever">
+<img align="right" src="https://github.com/andre3pazo/HW3-CMLS/assets/89461273/86f871e1-edb6-458a-88bf-b1c4b8c0adee" alt="Schematics" width="400" height="whatever">
 
 This computer music system exploits both hardware and software elements in order to simulate the
 experience of playing a maraca and simultaneously hearing its sound coming from different positions
