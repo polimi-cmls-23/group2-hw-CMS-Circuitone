@@ -7,6 +7,25 @@ plus a couple of sensors connected to the Arduino board.
 
 ![image_2023-05-17_17-28-49](https://github.com/andre3pazo/HW3-CMLS/assets/89461273/15447dbe-e8c2-4650-9227-208e279d383d)
 
-As tou can see in the picture below....
+<img align="right" src="https://github.com/andre3pazo/HW3-CMLS/assets/89461273/86f871e1-edb6-458a-88bf-b1c4b8c0adee" alt="Schematics" width="500" height="whatever">
 
-<img src="https://github.com/andre3pazo/HW3-CMLS/assets/89461273/86f871e1-edb6-458a-88bf-b1c4b8c0adee" alt="Schematics" width="500" height="whatever">
+This computer music system exploits both hardware and software elements in order to simulate the
+experience of playing a maraca and simultaneously hearing its sound coming from different positions
+on a theater stage, simulating a spacial movement.
+The user may modify some features of the sound and the position of the maraca on the stage by
+interacting both with the couple of physical sensors and the Graphical User Interface hosted on the
+PC.
+The general idea of the entire system is as follows: Arduino board is connected to a PC, and
+serial messages are transmitted from the Arduino sketch loaded on our Arduino UNO board to the
+Processing sketch for GUI interaction design. On the other hand, the Processing sketch sends OSC
+messages to our SuperCollider program, which generates sound based on the received messages. The
+sound is then played through the computer’s speakers.
+In summary, the breakdown of the roles of each component:
+* Arduino: The Arduino board is connected to the PC. The serial messages are sent to Processing
+for GUI interaction;
+* Processing: It receives serial messages from the Arduino board and creates a graphical user
+interface (GUI) for interaction and visualization;
+* SuperCollider: It receives OSC messages from the Arduino board and generates sound based on
+the received messages.
+* Computer speakers: They play the sound generated from SuperCollider.
+
