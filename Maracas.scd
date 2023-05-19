@@ -1,6 +1,4 @@
-// { Dust2.ar(MouseX.kr(1,10000,1), 0.4) }.scope(1, zoom:4);
-
-s.boot;
+s.reboot;
 
 (
 ~envelopeDown = Env.new([0,1,0], [0.03,0.2], [0,-4]);
@@ -10,15 +8,19 @@ s.boot;
 
 SynthDef(\maracas,
 	{
-		arg density = 10000, reverb = 0.1, goingDown = 1, t_trig = 0;
-		var sig;
+		arg density = 10000, pan = 0, reverb = 0.1, goingDown = 1, t_trig = 0, softness = 1, gain = 1;
+		var sig, freq, delay, attenuation;
 
+		freq = LinLin.kr(reverb, 0, 0.6, 20000, 3000);
+		delay = LinLin.kr(reverb, 0, 0.6, 0, 0.1);
+		attenuation = LinLin.kr(reverb, 0, 0.6, 1, 0.6);
+		gain = gain * attenuation;
 		sig = [Dust2.ar(density, 0.2), Dust2.ar(density, 0.2)];
 		sig = SelectX.ar(
 			goingDown,
 			[
-				sig * EnvGen.kr(~envelopeUp, t_trig),
-				sig * EnvGen.kr(~envelopeDown, t_trig)
+				sig * EnvGen.kr(~envelopeUp, t_trig, timeScale: softness),
+				sig * EnvGen.kr(~envelopeDown, t_trig, timeScale: softness)
 			]
 		);
 		sig = FreeVerb2.ar( // FreeVerb2 - true stereo UGen
@@ -26,50 +28,58 @@ SynthDef(\maracas,
             sig[1], // Right Channel
             reverb, 0.1, 1
         );
+		sig = DelayC.ar(sig, maxdelaytime: 0.1, delaytime: delay, mul: reverb/2, add: sig);
+		sig = Pan2.ar(Mix.ar(sig) * gain, pan);
+		sig = LPF.ar(sig, freq);
 		Out.ar(0, sig);
 	}
 ).add;
 
-/*
-~testDown = Synth(\maracas, [\density, 5000, \reverb, 0.2, \goingDown, 1]);
-~testUp = Synth(\maracas, [\density, 5000, \reverb, 0.2, \goingDown, 0]);
-~testDown.set(\t_trig, 1);
-~testUp.set(\t_trig, 1);
-*/
-
 NetAddr("127.0.0.1", 57120); // Same of the one in processing
 
 ~maracas = Synth(\maracas);
-
 OSCdef('OSCreceiver', // unfold the message
 	{
 		arg msg;
-		var density, reverb, trigger, isDown = 0;
+		var pan, density, reverb, trigger, isDown = 0, softness, gain;
 
-		density = msg[1];
-		reverb = msg[2];
-		trigger = msg[3];
-		isDown = msg[4];
+		pan = msg[1];
+		density = msg[2];
+		reverb = msg[3];
+		trigger = msg[4];
+		isDown = msg[5];
+		softness = msg[6];
+		gain = msg[7];
 
-		reverb = reverb / 2;
-		density = (density * 7000) + 3000;
+		pan = LinLin.kr(pan, 0, 1, -1, 1);
+		reverb = LinLin.kr(reverb, 0, 1, 0, 0.6);
+		softness = LinLin.kr(softness, 2, 255, 0.3, 3);
 
 		if(trigger == '1',
 			{
 				if((isDown == '1'),
 					{
 						~maracas.set(
+							\pan, pan,
 							\density, density,
 							\reverb, reverb,
 							\goingDown, isDown.asInteger,
-							\t_trig, 1);
+							\t_trig, 1,
+							\softness, softness,
+							\gain, gain
+						);
 				});
 				if((isDown == '0'),
 					{
-						~maracas.set(\density, density,
+						~maracas.set(
+							\pan, pan,
+							\density, density,
 							\reverb, reverb,
 							\goingDown, isDown.asInteger,
-							\t_trig, 1);
+							\t_trig, 1,
+							\softness, softness,
+							\gain, gain
+						);
 				});
 		});
 	},
