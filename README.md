@@ -15,8 +15,6 @@ plus a couple of sensors connected to the Arduino board.
 <br />
 <br />
 <br />
-<br />
-<br />
 
 <hr>
 
