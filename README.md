@@ -19,7 +19,7 @@ plus a couple of sensors connected to the Arduino board.
 <br />
 
 <p align="center">
-  <img src="https://github.com/andre3pazo/HW3-CMLS/assets/89461273/dbf14873-58d7-4990-8f01-777fd3566330" alt="CMS diagram" width = 681 height="whatever">
+  <img src="https://github.com/polimi-cmls-23/group2-hw-CMS-Circuitone/assets/89461273/39fda2ea-05d5-46ab-9ef3-f4e556825296" alt="CMS diagram" width = 681 height="whatever">
 </p>
 <br />
 <img align="right" src="https://github.com/andre3pazo/HW3-CMLS/assets/89461273/86f871e1-edb6-458a-88bf-b1c4b8c0adee" alt="Schematics" width="400" height="whatever">
