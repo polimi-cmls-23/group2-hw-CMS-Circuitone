@@ -18,11 +18,14 @@ PImage img;
 PImage img_rotated;
 PImage img_background;
 PImage img_sand;
+PImage img_mic;
+PImage img_shadow;
 float altezza = -50;
 float knobValue; 
 float panPos = 0;
 float xDist = 0;
 float yDist = 0;
+float distance = 0;
 int x1Space = 320;
 int x2Space = 1100;
 int y1Space = 315;
@@ -40,6 +43,8 @@ void setup() {
   img_rotated = loadImage("C:/Users/Gabriele/Documents/MEGA/Magistrale/Music and Acoustic Engineering/CMLS/HW3/FromArduinoToProcessing/Images/Maracas_rotated.png");
   img_sand = loadImage("C:/Users/Gabriele/Documents/MEGA/Magistrale/Music and Acoustic Engineering/CMLS/HW3/FromArduinoToProcessing/Images/Sand.png");
   img_background = loadImage("C:/Users/Gabriele/Documents/MEGA/Magistrale/Music and Acoustic Engineering/CMLS/HW3/FromArduinoToProcessing/Images/MaracaSpace_buco.png");
+  img_mic = loadImage("C:/Users/Gabriele/Documents/MEGA/Magistrale/Music and Acoustic Engineering/CMLS/HW3/FromArduinoToProcessing/Images/mic.png");
+  img_shadow = loadImage("C:/Users/Gabriele/Documents/MEGA/Magistrale/Music and Acoustic Engineering/CMLS/HW3/FromArduinoToProcessing/Images/Ombra.png");
   cP5 = new ControlP5(this);
   grainKnob = cP5.addKnob("Number of grains", 3000, 10000, 10000, 1167, 500, 130);
   grainKnob.setColorForeground(color(11, 79, 108))
@@ -66,8 +71,12 @@ void draw() {
   img.resize (150, 150);
   img_rotated.resize (150, 150);
   img_sand.resize (400, 400);
+  img_mic.resize(140, 90);
+  img_shadow.resize(500, 500);
   image(img_sand, 1100, int(altezza)); // range y da 20 a -50
   image(img_background, 0, 0);
+  image(img_shadow, 450, 650);
+  image(img_mic, 635, 820);
   
   if(mouseX > x1Space && mouseX < x2Space && mouseY > y1Space) {   
     if(isLow == 1) {
@@ -100,20 +109,30 @@ void draw() {
       image(img, xVal - 68, yVal - 55);
     }
   }
-  
+
   noFill();
-  rect(100, 400, 100, 400, 20);
+  rect(100, 500, 100, 300, 20);
   fill(253,192,69);
-  float slider = map(currentPot, 2, 255, -400, -30);
-  rect(100, 800, 100, slider, 20);
+  float slider = map(currentPot, 2, 255, -240, 0);
+  rect(100, 770, 100, slider);
   
+  fill(60);
+  rect(100, 500, 100, 30, 20, 20, 0, 0);
+  fill(253,192,69);
+  text("HARD", 150, 520);
+  fill(60);
+  rect(100, 770, 100, 30, 0, 0, 20, 20);
+  fill(253,192,69);
+  text("SOFT", 150, 790);
+  
+  fill(253,192,69);
   text("NUMBER OF\nGRAINS", 1232, 655);
   textSize(17);
   textAlign(CENTER);
   text("MASTER VOLUME", 1232, 880);
   textSize(17);
   textAlign(CENTER);
-  text("EMPHASIS", 150, 850);
+  text("ATTACK", 150, 850);
   textSize(17);
   textAlign(CENTER);
   
@@ -153,6 +172,44 @@ void draw() {
     panPos = 0;
   }
   
+  
+  noFill();
+  rect(70, 300, 300, 30, 20);
+  fill(253,192,69);
+  float sliderPan = map(panPos, 0, 1, -120, 120);
+  if(sliderPan > 0) {
+    rect(220, 300, sliderPan, 30, 20, 0, 0, 20);
+  }
+  else {
+    rect(220, 300, sliderPan, 30, 0, 20, 20, 0);
+  }
+  
+  fill(60);
+  rect(70, 300, 30, 30, 20, 0, 0, 20);
+  fill(253,192,69);
+  text("L", 85, 320);
+  fill(60);
+  rect(340, 300, 30, 30, 0, 20, 20, 0);
+  fill(253,192,69);
+  text("R", 355, 320);
+
+  distance = (sqrt(pow(xDist,2) + pow(yDist,2))) / (sqrt((pow((y2Space-y1Space),2)) + (pow(((x2Space-x1Space)/2),2))));
+  
+  noFill();
+  rect(70, 250, 420, 30, 20);
+  fill(253,192,69);
+  float sliderDistance = map(distance, 0, 1, 0, 300);
+  rect(130, 250, sliderDistance, 30);
+  
+  fill(60);
+  rect(70, 250, 60, 30, 20, 0, 0, 20);
+  fill(253,192,69);
+  text("NEAR", 100, 270);
+  fill(60);
+  rect(430, 250, 60, 30, 0, 20, 20, 0);
+  fill(253,192,69);
+  text("FAR", 460, 270);
+  
   OscMessage myMessage = new OscMessage("/mar");
   
   if(myPort.available() > 0) {
@@ -160,7 +217,7 @@ void draw() {
       if(val == 1) {
         myMessage.add(panPos);    // pan
         myMessage.add(grainKnob.getValue()); // number of grains
-        myMessage.add((sqrt(pow(xDist,2) + pow(yDist,2))) / (sqrt((pow((y2Space-y1Space),2)) + (pow(((x2Space-x1Space)/2),2)))));   // (-1)*Reverb  
+        myMessage.add(distance);   // (-1)*Reverb  
         myMessage.add("1"); // make the sound
         myMessage.add("1"); // maraca position (high or low) (2 possible sounds)
         myMessage.add(currentPot); // pot value --> softness
@@ -171,7 +228,7 @@ void draw() {
         if(val == 0) {
           myMessage.add(panPos);    // pan
           myMessage.add(grainKnob.getValue()); // number of grains
-          myMessage.add((sqrt(pow(xDist,2) + pow(yDist,2))) / (sqrt((pow((y2Space-y1Space),2)) + (pow(((x2Space-x1Space)/2),2)))));   // (-1)*Reverb  
+          myMessage.add(distance);   // (-1)*Reverb  
           myMessage.add("1");
           myMessage.add("0");
           myMessage.add(currentPot); // pot value --> softness
